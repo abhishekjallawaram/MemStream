@@ -45,7 +45,7 @@ After an initial training of the feature extractor on a small subset of normal d
 MemStream expects the input multi-aspect record stream to be stored in a contains `,` separated file.
 
 ## Datasets
-Processed Datasets can be downloaded from [here](https://drive.google.com/file/d/1JNrhOr8U3Nqef1hBOqvHQPzBNWzDOFdl/view). Please unzip and place the files in the data folder of the repository.
+Processed Datasets can be downloaded from [here](https://drive.google.com/file/d/1najJ13lSwPpB9lkGk-6ZzgAV65m8ux7Y/view?usp=sharing). Please unzip and place the files in the data folder of the repository.
 
 1. [KDDCUP99](http://kdd.ics.uci.edu/databases/kddcup99/kddcup99.html)
 2. [NSL-KDD](https://www.unb.ca/cic/datasets/nsl.html)
