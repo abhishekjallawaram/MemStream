@@ -32,6 +32,70 @@ After an initial training of the feature extractor on a small subset of normal d
 11. Pima Indians Diabetes: Run `python3 memstream.py --dataset pima --beta 0.001 --memlen 64`
 12. Covertype: Run `python3 memstream.py --dataset cover --beta 0.0001 --memlen 2048`
 
+#RQ1
+python3 memstream.py --dataset KDD --beta 1 --memlen 256 —RQ1 True
+python3 memstream.py --dataset NSL --beta 0.1 --memlen 2048 —RQ1 True
+python3 memstream.py --dataset UNSW --beta 0.1 --memlen 2048 —RQ1 True
+python3 memstream.py --dataset DOS --beta 0.1 --memlen 2048 —RQ1 True
+python3 memstream.py --dataset ionosphere --beta 0.001 --memlen 4 —RQ1 True
+python3 memstream.py --dataset cardio --beta 1 --memlen 64 —RQ1 True
+python3 memstream.py --dataset statlog --beta 0.01 --memlen 32 —RQ1 True
+python3 memstream.py --dataset satimage-2 --beta 10 --memlen 256 —RQ1 True
+python3 memstream.py --dataset mammography --beta 0.1 --memlen 128 —RQ1 True
+python3 memstream.py --dataset pima --beta 0.001 --memlen 64 —RQ1 True
+python3 memstream.py --dataset cover --beta 0.0001 --memlen 2048 —RQ1 True
+
+#RQ2
+python3 memstream.py --dataset KDD --beta 1 --memlen 256 —RQ2 True
+python3 memstream.py --dataset NSL --beta 0.1 --memlen 2048 —RQ2 True
+python3 memstream.py --dataset UNSW --beta 0.1 --memlen 2048 —RQ2 True
+python3 memstream.py --dataset DOS --beta 0.1 --memlen 2048 —RQ2 True
+python3 memstream.py --dataset ionosphere --beta 0.001 --memlen 4 —RQ2 True
+python3 memstream.py --dataset cardio --beta 1 --memlen 64 —RQ2 True
+python3 memstream.py --dataset statlog --beta 0.01 --memlen 32 —RQ2 True
+python3 memstream.py --dataset satimage-2 --beta 10 --memlen 256 —RQ2 True
+python3 memstream.py --dataset mammography --beta 0.1 --memlen 128 —RQ2 True
+python3 memstream.py --dataset pima --beta 0.001 --memlen 64 —RQ2 True
+python3 memstream.py --dataset cover --beta 0.0001 --memlen 2048 —RQ2 True
+
+#RQ3
+python3 memstream.py --dataset KDD --beta 1 --memlen 256 —RQ3 True
+python3 memstream.py --dataset NSL --beta 0.1 --memlen 2048 —RQ3 True
+python3 memstream.py --dataset UNSW --beta 0.1 --memlen 2048 —RQ3 True
+python3 memstream.py --dataset DOS --beta 0.1 --memlen 2048 —RQ3 True
+python3 memstream.py --dataset ionosphere --beta 0.001 --memlen 4 —RQ3 True
+python3 memstream.py --dataset cardio --beta 1 --memlen 64 —RQ3 True
+python3 memstream.py --dataset statlog --beta 0.01 --memlen 32 —RQ3 True
+python3 memstream.py --dataset satimage-2 --beta 10 --memlen 256 —RQ3 True
+python3 memstream.py --dataset mammography --beta 0.1 --memlen 128 —RQ3 True
+python3 memstream.py --dataset pima --beta 0.001 --memlen 64 —RQ3 True
+python3 memstream.py --dataset cover --beta 0.0001 --memlen 2048 —RQ3 True
+
+#RQ4
+python3 memstream.py --dataset KDD --beta 1 --memlen 256 —RQ4 True
+python3 memstream.py --dataset NSL --beta 0.1 --memlen 2048 —RQ4 True
+python3 memstream.py --dataset UNSW --beta 0.1 --memlen 2048 —RQ4 True
+python3 memstream.py --dataset DOS --beta 0.1 --memlen 2048 —RQ4 True
+python3 memstream.py --dataset ionosphere --beta 0.001 --memlen 4 —RQ4 True
+python3 memstream.py --dataset cardio --beta 1 --memlen 64 —RQ4 True
+python3 memstream.py --dataset statlog --beta 0.01 --memlen 32 —RQ4 True
+python3 memstream.py --dataset satimage-2 --beta 10 --memlen 256 —RQ4 True
+python3 memstream.py --dataset mammography --beta 0.1 --memlen 128 —RQ4 True
+python3 memstream.py --dataset pima --beta 0.001 --memlen 64 —RQ4 True
+python3 memstream.py --dataset cover --beta 0.0001 --memlen 2048 —RQ4 True
+
+#RQ5
+python3 memstream.py --dataset KDD --beta 1 --memlen 256 —RQ5 True
+python3 memstream.py --dataset NSL --beta 0.1 --memlen 2048 —RQ5 True
+python3 memstream.py --dataset UNSW --beta 0.1 --memlen 2048 —RQ5 True
+python3 memstream.py --dataset DOS --beta 0.1 --memlen 2048 —RQ5 True
+python3 memstream.py --dataset ionosphere --beta 0.001 --memlen 4 —RQ5 True
+python3 memstream.py --dataset cardio --beta 1 --memlen 64 —RQ5 True
+python3 memstream.py --dataset statlog --beta 0.01 --memlen 32 —RQ5 True
+python3 memstream.py --dataset satimage-2 --beta 10 --memlen 256 —RQ5 True
+python3 memstream.py --dataset mammography --beta 0.1 --memlen 128 —RQ5 True
+python3 memstream.py --dataset pima --beta 0.001 --memlen 64 —RQ5 True
+python3 memstream.py --dataset cover --beta 0.0001 --memlen 2048 —RQ5 True
 
 ## Command line options
   * `--dataset`: The dataset to be used for training. Choices 'NSL', 'KDD', 'UNSW', 'DOS'. (default 'NSL')
@@ -40,6 +104,11 @@ After an initial training of the feature extractor on a small subset of normal d
   * `--dev`: Pytorch device to be used for training like "cpu", "cuda:0" etc. (default: 'cuda:0')
   * `--lr`: Learning rate (default: 0.01)
   * `--epochs`: Number of epochs (default: 5000)
+  * '--RQ1' : Hypertune best metrics : Default False
+  * '--RQ2' : Effect of Activation Functions : Default False
+  * '--RQ3' : Memory Poisoning Prevention Analysis : Default False
+  * '--RQ4' : Concept Dript Analysis : Default False
+  * '--RQ5' : Impact of Memory : Default False
 
 ## Input file format
 MemStream expects the input multi-aspect record stream to be stored in a contains `,` separated file.
@@ -60,5 +129,3 @@ Processed Datasets can be downloaded from [here](https://drive.google.com/file/d
 11. [Pima Indians Diabetes](https://archive.ics.uci.edu/ml/index.php)
 12. [Covertype](https://archive.ics.uci.edu/ml/index.php)
 
-## Environment
-This code has been tested on Debian GNU/Linux 9 with a 12GB Nvidia GeForce RTX 2080 Ti GPU, CUDA Version 10.2 and PyTorch 1.5.
