@@ -3,19 +3,12 @@
 <p>
   <a href="https://arxiv.org/pdf/2106.03837.pdf"><img src="http://img.shields.io/badge/Paper-PDF-brightgreen.svg"></a>
   <a href="https://github.com/Stream-AD/MemStream/blob/master/LICENSE">
-    <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg">
   </a>
 </p>
 
 Implementation of
 
 - [MemStream: Memory-Based Streaming Anomaly Detection](https://arxiv.org/pdf/2106.03837.pdf). Siddharth Bhatia, Arjit Jain, Shivin Srivastava, Kenji Kawaguchi, Bryan Hooi. The Web Conference (formerly WWW), 2022.
-
-MemStream detects anomalies from a multi-aspect data stream. We output an anomaly score for each record. MemStream is a memory augmented feature extractor, allows for quick retraining, gives a theoretical bound on the memory size for effective drift handling, is robust to memory poisoning, and outperforms 11 state-of-the-art streaming anomaly detection baselines.
-
-![](MemStream.png)
-After an initial training of the feature extractor on a small subset of normal data, MemStream processes records in two steps: (i) It outputs anomaly scores for each record by querying the memory for K-nearest neighbours to the record encoding and calculating a discounted distance and (ii) It updates the memory, in a FIFO manner, if the anomaly score is within an update threshold β.
-
 
 ## Demo
 
