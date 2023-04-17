@@ -1,0 +1,1 @@
+Learning Rate   Memory Size     Beta            Epochs          Act_fn          AUC             Time           
