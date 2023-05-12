@@ -1,0 +1,9 @@
+Learning Rate   Memory Size     Beta            Epochs          Act_fn          AUC             Time           
+1.0             256             0.0001          Softsign        5000            0.6980 122.14s
+1.0             256             0.0001          LogSoftmax      5000            0.3687 114.67s
+1.0             256             0.0001          Tanh            5000            0.8746 108.93s
+1.0             256             0.0001          Softmax         5000            0.8013 107.48s
+1.0             256             0.0001          Softmin         5000            0.8590 109.09s
+
+Best Parameters: {'memory_len': 256, 'beta': 0.0001, 'lr': 1.0, 'epochs': 5000, 'activation_fn': 'Tanh'}
+Best ROC-AUC: 0.8746479622425952
