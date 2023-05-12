@@ -1,0 +1,4 @@
+Found device: NVIDIA A100-SXM-80GB, n_gpu: 1
+mammography 0.1 128 0.01 5000
+Execution time: 5.15 seconds
+ROC-AUC 0.8193759901425807

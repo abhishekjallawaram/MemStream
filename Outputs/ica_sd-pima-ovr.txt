@@ -1,0 +1,4 @@
+Found device: NVIDIA A100-SXM-80GB, n_gpu: 1
+pima 0.001 64 0.01 5000
+Execution time: 4.18 seconds
+ROC-AUC 0.735912
