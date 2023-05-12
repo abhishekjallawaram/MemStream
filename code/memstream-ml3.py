@@ -10,10 +10,22 @@ import scipy.spatial as sp
 from torch.autograd import Variable
 import argparse
 import scipy.io
-import time
-from tqdm import tqdm
-import os
-from matplotlib.backends.backend_pdf import PdfPages
+from sklearn.metrics import classification_report
+
+torch.cuda.empty_cache()
+
+# Confirm that the GPU is detected
+
+assert torch.cuda.is_available()
+
+# Get the GPU device name.
+device_name = torch.cuda.get_device_name()
+n_gpu = torch.cuda.device_count()
+print(f"Found device: {device_name}, n_gpu: {n_gpu}")
+
+
+start_time = time.time()
+import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', default='NSL')
@@ -23,14 +35,15 @@ parser.add_argument("--epochs", type=int, help="number of epochs for ae", defaul
 parser.add_argument("--lr", type=float, help="learning rate", default=1e-2)
 parser.add_argument("--memlen", type=int, help="size of memory", default=2048)
 parser.add_argument("--seed", type=int, help="random seed", default=0)
-parser.add_argument("--gamma", type=float, help="knn coefficient", default=0)
+parser.add_argument("--act_fn",help="Activation fucntion", default="Tanh")
 parser.add_argument("--RQ1", help="Hypertune best metrics : Default False", default=False)
 parser.add_argument("--RQ2", help="Effect of Activation Functions : Default False",default=False)
 parser.add_argument("--RQ3", help="Memory Poisoning Prevention Analysis",default=False)
 parser.add_argument("--RQ4", help="Concept Drift",default=False)
 parser.add_argument("--RQ5", help="Impact of Memory",default=False)
-parser.add_argument("--RQ6", help="Impact of Neighbors",default=False)
-parser.add_argument("--K", help="Number of Neighbors Considered",default=3)
+
+args = parser.parse_args()
+
 args = parser.parse_args()
 
 torch.manual_seed(args.seed)
@@ -58,6 +71,9 @@ else:
 
 device = torch.device(args.dev)
 
+
+from sklearn.preprocessing import MinMaxScaler
+
 class MemStream(nn.Module):
     def __init__(self, in_dim, params, act_fn):
         super(MemStream, self).__init__()
@@ -72,13 +88,17 @@ class MemStream(nn.Module):
         self.mem_data.requires_grad = False
         self.batch_size = params['memory_len']
         self.num_mem_update = 0
-        self.gamma = 0
         
-        self.encoder = nn.Sequential(
+        self.encoder1 = nn.Sequential(
             nn.Linear(self.in_dim, self.out_dim),
             act_fn,
         ).to(device)
         
+        self.encoder2 = nn.Sequential(
+            nn.Linear(self.in_dim, self.out_dim),
+            act_fn,
+        ).to(device)
+
         self.decoder = nn.Sequential(
             nn.Linear(self.out_dim, self.in_dim)
         ).to(device)
@@ -86,22 +106,34 @@ class MemStream(nn.Module):
         self.clock = 0
         self.last_update = -1
         self.optimizer = torch.optim.Adam(self.parameters(), lr=params['lr'])
-        self.loss_fn = nn.MSELoss()
+        self.recon_loss_fn = nn.MSELoss()
+        self.enc_loss_fn = nn.MSELoss()
+        # self.recon_loss_fn = nn.BCEWithLogitsLoss()
+        # self.enc_loss_fn = nn.BCEWithLogitsLoss()
         #self.loss_fn = nn.BCEWithLogitsLoss()
         self.count = 0
-        self.K = params['K']
-        self.exp = torch.Tensor([self.gamma**i for i in range(self.K)]).to(device)
-
 
     def train_autoencoder(self, data, epochs):
         self.mean, self.std = self.mem_data.mean(0), self.mem_data.std(0)
         new = (data - self.mean) / self.std
         new[:, self.std == 0] = 0
-        new = Variable(new)
+        new = new.to(device)
         for epoch in range(epochs):
             self.optimizer.zero_grad()
-            output = self.decoder(self.encoder(new + 0.001*torch.randn_like(new).to(device)))
-            loss = self.loss_fn(output, new)
+            encoded1 = self.encoder1(new + 0.001 * torch.randn_like(new).to(device))
+            output = self.decoder(encoded1)
+            recon_loss = self.recon_loss_fn(output, new)
+            
+            encoded2 = self.encoder2(output + 0.001 * torch.randn_like(new).to(device))
+            enc_loss = self.enc_loss_fn(encoded2, encoded1.detach())
+            
+            loss = recon_loss + enc_loss
+            #loss = (recon_loss + enc_loss) * 0.5
+            
+            # if loss.item() < 1e-5:
+            #     print(f"Epoch [{epoch+1}/{epochs}], Loss: {loss.item():.6f}")
+            #     break
+            
             loss.backward()
             self.optimizer.step()
 
@@ -117,23 +149,72 @@ class MemStream(nn.Module):
                 return 1
         return 0
 
+
     def initialize_memory(self, x):
-        mean, std = model.mem_data.mean(0), model.mem_data.std(0)
+        mean, std = self.mem_data.mean(0), self.mem_data.std(0)
         new = (x - mean) / std
         new[:, std == 0] = 0
-        self.memory = self.encoder(new)
+        self.memory = self.encoder1(new.to(device))
         self.memory.requires_grad = False
-        self.mem_data = x
+        self.mem_data = x.to(device)
 
     def forward(self, x):
         new = (x - self.mean) / self.std
         new[:, self.std == 0] = 0
-        encoder_output = self.encoder(new)
-#         loss_values = torch.norm(self.memory - encoder_output, dim=1, p=1).min()
-        loss_values = (torch.topk(torch.norm(self.memory - encoder_output, dim=1, p=1), k=self.K, largest=False)[0]*self.exp).sum()/self.exp.sum()
-        self.update_memory(loss_values, encoder_output, x)
-        return loss_values
+        encoded1 = self.encoder1(new + 0.001 * torch.randn_like(new).to(device))
+        output = self.decoder(encoded1)
+        encoded2 = self.encoder2(output + 0.001 * torch.randn_like(new).to(device))
+        recon_loss = self.recon_loss_fn(output, new)
+        enc_loss = self.enc_loss_fn(encoded2, encoded1.detach())
+        loss = recon_loss + enc_loss
+        self.update_memory(loss, encoded1, x.to(device))
+        return loss
 
+class EnsembleMemStream():
+    def __init__(self, num_models, params, act_fn):
+        self.num_models = num_models
+        self.models = []
+        for i in range(num_models):
+            self.models.append(MemStream(params['in_dim'],params=params, act_fn=act_fn))
+            
+    def train(self, numeric, labels, epochs):
+        for i in range(self.num_models):
+            print(f"Training Model {i+1}/{self.num_models}")
+            np.random.seed(i)
+            torch.manual_seed(i)
+            N = params['memory_len']
+            #K_NN = params['K']
+            model = self.models[i]
+            init_data = numeric[labels == 0][:N].to(device)
+            model.mem_data = init_data
+            torch.set_grad_enabled(True)
+            model.train_autoencoder(Variable(init_data).to(device), epochs=epochs)
+            torch.set_grad_enabled(False)
+            model.initialize_memory(Variable(init_data[:N]))
+            
+            # data_loader = DataLoader(numeric, batch_size=params['batch_size'])
+            # err = []
+            # for data in data_loader:
+            #     output = model(data.to(device))
+            #     err.append(output)
+            # scores = np.array([i.cpu() for i in err])
+            # auc = metrics.roc_auc_score(labels, scores)
+            # print(f"Model {i+1} ROC-AUC: {auc}")
+            
+    def predict(self, numeric):
+        ensemble_scores = np.zeros(len(numeric))
+        for model in self.models:
+            data_loader = DataLoader(numeric, batch_size=params['batch_size'])
+            err = []
+            for data in data_loader:
+                output = model(data.to(device))
+                err.append(output)
+            scores = np.array([i.cpu() for i in err])
+            ensemble_scores += scores
+        return ensemble_scores / self.num_models
+
+
+        
 if args.dataset in ['KDD', 'NSL', 'UNSW', 'DOS']:
     numeric = torch.FloatTensor(np.loadtxt(nfile, delimiter = ','))
     labels = np.loadtxt(lfile, delimiter=',')
@@ -143,37 +224,52 @@ else:
 
 if args.dataset == 'KDD':
     labels = 1 - labels
-    
+torch.manual_seed(args.seed)
+N = args.memlen
+params = {
+          'beta': args.beta, 'memory_len': N, 'batch_size':1, 'lr':args.lr , 'in_dim' : numeric[0].shape[0]
+         }
+
 if args.dataset == 'SYN':
     numeric = torch.FloatTensor(np.loadtxt(nfile, delimiter = ',')).reshape(-1, 1)
     labels = np.loadtxt(lfile, delimiter=',')
+
+
+ensemble_model = EnsembleMemStream(num_models=21, params=params, act_fn=act_fn)
+
+print(f"Training Ensemble of {ensemble_model.num_models} models...")
+ensemble_model.train(numeric, labels, epochs=args.epochs)
+
+print("Making predictions using Ensemble model...")
+ensemble_scores = ensemble_model.predict(numeric)
+auc = metrics.roc_auc_score(labels, ensemble_scores)
+print(f"Execution time: {time.time()-start_time:.2f} seconds")
+print("Ensemble ROC-AUC:", auc)
     
-torch.manual_seed(args.seed)
-N = args.memlen
-K_NN = args.K
-params = {
-          'beta': args.beta, 'memory_len': N, 'batch_size':1, 'lr':args.lr, 'gamma':args.gamma ,'K': K_NN
-         }
 
-model = MemStream(numeric[0].shape[0],params,act_fn).to(device)
 
-batch_size = params['batch_size']
-print(args.dataset, args.beta, args.gamma, args.memlen, args.lr, args.epochs)
-data_loader = DataLoader(numeric, batch_size=batch_size)
-init_data = numeric[labels == 0][:N].to(device)
-model.mem_data = init_data
-torch.set_grad_enabled(True)
-model.train_autoencoder(Variable(init_data).to(device), epochs=args.epochs)
-torch.set_grad_enabled(False)
-model.initialize_memory(Variable(init_data[:N]))
-err = []
-for data in data_loader:
-    output = model(data.to(device))
-    err.append(output)
-    #print("Loss:", output.item())
-scores = np.array([i.cpu() for i in err])
-auc = metrics.roc_auc_score(labels, scores)
-print("ROC-AUC", auc)
+# model = MemStream(numeric[0].shape[0],params,act_fn).to(device)
+
+
+# batch_size = params['batch_size']
+# print(args.dataset, args.beta, args.memlen, args.lr, args.epochs)
+# data_loader = DataLoader(numeric, batch_size=batch_size)
+# init_data = numeric[labels == 0][:N].to(device)
+# model.mem_data = init_data
+# torch.set_grad_enabled(True)
+# model.train_autoencoder(Variable(init_data).to(device), epochs=args.epochs)
+# torch.set_grad_enabled(False)
+# model.initialize_memory(Variable(init_data[:N]))
+# err = []
+# for data in data_loader:
+#     output = model(data.to(device))
+#     err.append(output)
+# scores = np.array([i.cpu().numpy() for i in err], dtype=np.float32)
+# print(err[0])
+# auc = metrics.roc_auc_score(labels, scores)
+# print(f"Execution time: {time.time()-start_time:.2f} seconds")
+# print("ROC-AUC", auc)
+
 
 #RQ1 hyper-parametertuning
 if args.RQ1:
@@ -215,9 +311,7 @@ if args.RQ1:
                     'beta': thres,
                     'lr': lr,
                     'epochs': num_epochs,
-                    'batch_size': batch_size,
-                    'gamma':args.gamma,
-                    'K': K_NN
+                    'batch_size': batch_size
                 }
                 model = MemStream(numeric[0].shape[0], params,act_fn).to(device)
 
@@ -243,8 +337,7 @@ if args.RQ1:
                         'beta': thres,
                         'lr': lr,
                         'epochs': num_epochs,
-                        'batch_size': batch_size,
-                        'gamma':args.gamma
+                        'batch_size': batch_size
                     }
 
                
@@ -264,16 +357,19 @@ if args.RQ1:
     model_name = args.dataset+'_RQ1_'+str(file_num) + '.pt'
     torch.save(model.state_dict(), model_name)
     output_file.write("Best Model saved as: "+str(model_name)+"\n")
-
+    
 #impact of activation function
 if args.RQ2:
+    import time
+    from tqdm import tqdm
+    import os
+    import matplotlib.pyplot as plt
+    from matplotlib.backends.backend_pdf import PdfPages
     params = {
         'beta': args.beta, 
         'memory_len': N, 
         'batch_size': 1, 
-        'lr': args.lr,
-        'gamma':args.gamma,
-        'K': K_NN
+        'lr': args.lr
     }
     
     activation_functions = {
@@ -298,14 +394,14 @@ if args.RQ2:
     best_auc = 0
     output_file.write(f"{'Learning Rate':<15} {'Memory Size':<15} {'Beta':<15} {'Epochs':<15} {'Act_fn':<15} {'AUC':<15} {'Time':<15}\n")
     print(f"{'Learning Rate':<15} {'Memory Size':<15} {'Beta':<15} {'Epochs':<15} {'Act_fn':<15} {'AUC':<15} {'Time':<15}")
-    
+    file_num = 1
     output_file1 = args.dataset+'_RQ2.pdf'
     while os.path.exists(output_file1):
-        output_file1 = args.dataset+'_RQ2_'+str(file_num)+'.txt'
+        output_file1 = args.dataset+'_RQ2_'+str(file_num)+'.pdf'
         file_num += 1
     
-    
     figs = []
+    auc_dict = {}
     with PdfPages(output_file1) as pdf:
         for name, act_fn in activation_functions.items():
             start_time_1 = time.time()
@@ -332,13 +428,14 @@ if args.RQ2:
                     'beta': args.beta,
                     'lr': args.lr,
                     'epochs': num_epochs,
-                    'activation_fn': name,
-                    'gamma':args.gamma,
-                    'K': K_NN
+                    'activation_fn': name
                 }
+        
+            auc_dict[name] = scores
+        
             output_file.write(f"{args.lr:<15} {N:<15} {args.beta:<15} {name:<15} {num_epochs:<15} {auc:.4f} {time.time()-start_time_1:.2f}s\n")
             print(f"{args.lr:<15} {N:<15} {args.beta:<15} {name:<15} {num_epochs:<15} {auc:.4f} {time.time()-start_time_1:.2f}s")
-
+        
             fig = plt.figure()
             plt.title(f"Activation Function: {name}")
             plt.xlabel("Epochs")
@@ -350,10 +447,88 @@ if args.RQ2:
             figs.append(fig)
             plt.close(fig)
     
+        fig = plt.figure()
+        plt.title(f"ROC-AUC vs Activation Function")
+        plt.xlabel("Activation Function")
+        plt.ylabel("ROC-AUC")
+        plt.ylim(0.0, 1.0)
+        plt.grid(True)
+        plt.bar(auc_dict.keys(), [metrics.roc_auc_score(labels, auc_dict[name]) for name in auc_dict.keys()])
+        pdf.savefig(fig)
+        figs.append(fig)
+        plt.close(fig)
+
     print(f"Best ROC-AUC: {best_auc:.4f}")
     print(f"Best params: {best_params}")
     output_file.write("\nBest Parameters: "+str(best_params)+"\n")
     output_file.write("Best ROC-AUC: "+str(best_auc)+"\n")
+    output_file.close()
+
+# #impact of activation function
+# if args.RQ2:
+#     params = {
+#           'beta': args.beta, 'memory_len': N, 'batch_size':1, 'lr':args.lr
+#          }
+#     activation_functions = {'Softsign': nn.Softsign(), 
+#                             'LogSoftmax': nn.LogSoftmax(dim=1), 
+#                             'Tanh': nn.Tanh(), 
+#                             'Softmax': nn.Softmax(dim=1),
+#                             'Softmin': nn.Softmin(dim=1)
+#                            }
+#     num_epochs = 5000
+#     import time
+#     from tqdm import tqdm
+#     import os
+    
+#     file_num = 1
+#     output_file = args.dataset+'_RQ2.txt'
+#     while os.path.exists(output_file):
+#         output_file = args.dataset+'_RQ2_'+str(file_num)+'.txt'
+#         file_num += 1
+    
+#     output_file = open(output_file, 'w')
+    
+#     best_model = None
+#     best_auc = 0
+#     output_file.write(f"{'Learning Rate':<15} {'Memory Size':<15} {'Beta':<15} {'Epochs':<15} {'Act_fn':<15} {'AUC':<15} {'Time':<15}\n")
+#     print(f"{'Learning Rate':<15} {'Memory Size':<15} {'Beta':<15} {'Epochs':<15} {'Act_fn':<15} {'AUC':<15} {'Time':<15}")
+#     for name, act_fn in activation_functions.items():
+#         start_time_1 = time.time()
+#         model = MemStream(numeric[0].shape[0], params, act_fn).to(device)
+#         init_data = numeric[labels == 0][:N].to(device)
+#         model.mem_data = init_data
+
+#         torch.set_grad_enabled(True)
+#         model.train_autoencoder(Variable(init_data).to(device), epochs=num_epochs)
+#         torch.set_grad_enabled(False)
+#         model.initialize_memory(Variable(init_data[:N]))
+
+#         err = []
+#         for data in data_loader:
+#             output = model(data.to(device))
+#             err.append(output)
+#         scores = np.array([i.cpu() for i in err])
+#         auc = metrics.roc_auc_score(labels, scores)
+
+#         if auc > best_auc:
+#             best_auc = auc
+#             best_params = {
+#                 'memory_len': args.memlen,
+#                 'beta': args.beta,
+#                 'lr': args.lr,
+#                 'epochs': num_epochs,
+#                 'activation_fn': name
+#             }
+
+               
+#         output_file.write(f"{args.lr:<15} {N:<15} {args.beta:<15} {name:<15} {num_epochs:<15} {auc:.4f} {time.time()-start_time_1:.2f}s\n")
+#         print(f"{args.lr:<15} {N:<15} {args.beta:<15} {name:<15} {num_epochs:<15} {auc:.4f} {time.time()-start_time_1:.2f}s")
+
+#     output_file.write("\nBest Parameters: "+str(best_params)+"\n")
+#     output_file.write("Best ROC-AUC: "+str(best_auc)+"\n")
+    
+#     print("Best Parameters:", best_params)
+#     print("Best ROC-AUC:", best_auc)
 
 #Memory Poisoning Prevention Analysis
 if args.RQ3:
@@ -370,13 +545,13 @@ if args.RQ3:
         file_num += 1
     
     output_file = open(output_file, 'w')
-    params = {'memory_len': N, 'batch_size': 1, 'lr': 1e-2,'K': K_NN}
+    params = {'memory_len': N, 'batch_size': 1, 'lr': 1e-2}
     best_auc = 0.0
     best_params = {}
     betas = [1, 0.1, 0.01, 0.001, 0.0001]
     gammas = [0.0, 0.25, 0.5, 0.75, 1.0]
     output_file1 = args.dataset+'_RQ3.pdf'
-    while os.path.exists(output_file1):
+    while os.path.exists(output_file):
         output_file1 = args.dataset+'_RQ3_'+str(file_num)+'.pdf'
         file_num += 1
 
@@ -425,7 +600,6 @@ if args.RQ3:
         print(f"Best params: {best_params}")
         output_file.write("\nBest Parameters: "+str(best_params)+"\n")
         output_file.write("Best ROC-AUC: "+str(best_auc)+"\n")
-
         
 if args.RQ4:
     with open('conceptdriftdata.txt', 'r') as f:
@@ -443,7 +617,6 @@ if args.RQ4:
     from torch.utils.data import DataLoader, TensorDataset
     
     numeric = torch.FloatTensor(np.loadtxt('conceptdriftdata.txt', delimiter = ',')).reshape(-1, 1)
-    N = 256
     data_loader = DataLoader(numeric, batch_size=batch_size)
     init_data = numeric[:N].to(device)
     model.mem_data = init_data
@@ -470,7 +643,6 @@ if args.RQ5:
     import os
     import matplotlib.pyplot as plt
     from matplotlib.backends.backend_pdf import PdfPages
-    
     n = 14
     memory_len = [pow(2, i) for i in range(2, n+1)]
     num_epochs = 5000
@@ -498,14 +670,12 @@ if args.RQ5:
     with PdfPages(output_file1) as pdf:
         for mem in memory_len:
             params = {
-            'beta': args.beta, 
-            'act_fn' : nn.Tanh(),
-            'batch_size': 1, 
-            'lr': args.lr,
-            'gamma':args.gamma,
-            'memory_len': mem,
-            'K': K_NN
-            }
+                'beta': args.beta, 
+                'act_fn' : nn.Tanh(),
+                'batch_size': 1, 
+                'lr': args.lr,
+                'memory_len': mem
+                }
             start_time_1 = time.time()
             model = MemStream(numeric[0].shape[0], params, act_fn).to(device)
             init_data = numeric[labels == 0][:mem].to(device) # use mem instead of N
@@ -530,9 +700,9 @@ if args.RQ5:
                     'beta': args.beta,
                     'lr': args.lr,
                     'epochs': num_epochs,
-                    'activation_fn': name,
-                    'K': K_NN
+                    'activation_fn': "Tanh"
                 }
+            name = "Tanh"
         
             auc_dict[mem] = auc 
         
@@ -541,90 +711,9 @@ if args.RQ5:
         
     
         fig = plt.figure()
-        plt.title(f"ROC-AUC vs Memory Size")
+        plt.title("ROC-AUC vs Memory Size")
         plt.xlabel("Memory Size")
         plt.ylabel("ROC-AUC")
-
-
-if args.RQ6:
-    params = {
-        'beta': args.beta, 
-        'memory_len': N, 
-        'batch_size': 1, 
-        'lr': args.lr,
-        'gamma':args.gamma,
-        'K' : 3
-    }
-    
-    act_fn = nn.Tanh()
-    K = [(2*i)+1 for i in range(1, 25)]
-    
-    num_epochs = 5000
-    
-    file_num = 1
-    output_file = args.dataset+'_RQ6.txt'
-    while os.path.exists(output_file):
-        output_file = args.dataset+'_RQ6_'+str(file_num)+'.txt'
-        file_num += 1
-    
-    output_file = open(output_file, 'w')
-    
-    best_model = None
-    best_auc = 0
-    output_file.write(f"{'Learning Rate':<15} {'Memory Size':<15} {'Beta':<15} {'K':<15} {'Epochs':<15} {'AUC':<15} {'Time':<15}\n")
-    print(f"{'Learning Rate':<15} {'Memory Size':<15} {'Beta':<15} {'K':<15} {'Epochs':<15} {'AUC':<15} {'Time':<15}")
-    
-    output_file1 = args.dataset+'_RQ6.pdf'
-    while os.path.exists(output_file1):
-        output_file1 = args.dataset+'_RQ6_'+str(file_num)+'.txt'
-        file_num += 1
-    
-    
-    figs = []
-    with PdfPages(output_file1) as pdf:
-        for K_NN in K:
-            start_time_1 = time.time()
-            params['K'] = K_NN
-            model = MemStream(numeric[0].shape[0], params, act_fn).to(device)
-            init_data = numeric[labels == 0][:N].to(device)
-            model.mem_data = init_data
-
-            torch.set_grad_enabled(True)
-            model.train_autoencoder(Variable(init_data).to(device), epochs=num_epochs)
-            torch.set_grad_enabled(False)
-            model.initialize_memory(Variable(init_data[:N]))
-
-            err = []
-            for data in data_loader:
-                output = model(data.to(device))
-                err.append(output)
-            scores = np.array([i.cpu() for i in err])
-            auc = metrics.roc_auc_score(labels, scores)
-
-            if auc > best_auc:
-                best_auc = auc
-                best_params = {
-                    'memory_len': args.memlen,
-                    'beta': args.beta,
-                    'lr': args.lr,
-                    'epochs': num_epochs,
-                    'activation_fn': 'Tanh',
-                    'gamma':args.gamma,
-                    'K': K_NN
-                }
-            output_file.write(f"{args.lr:<15} {N:<15} {args.beta:<15} {K_NN:<15} {num_epochs:<15} {auc:.4f} {time.time()-start_time_1:.2f}s\n")
-            print(f"{args.lr:<15} {N:<15} {args.beta:<15} {K_NN:<15} {num_epochs:<15} {auc:.4f} {time.time()-start_time_1:.2f}s")
-
-            fig = plt.figure()
-            plt.title("K vs ROC-AUC")
-            plt.xlabel("K")
-            plt.ylabel("ROC-AUC")
-            plt.ylim(0.0, 1.0)
-            plt.grid(True)
-            plt.plot(len(scores), auc)
-            plt.show()
-    
-    print(f"Best ROC-AUC: {best_auc:.4f}")
-    print(f"Best params: {best_params}")
-    output_file.write("\nBest Parameters: "+str(best_params)+"\n")
-    output_file.write("Best ROC-AUC: "+str(best_auc)+"\n")
+        plt.plot(list(auc_dict.keys()), list(auc_dict.values()))
+        pdf.savefig(fig)
+        plt.close()

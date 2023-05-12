@@ -1,0 +1,2 @@
+Learning Rate   Memory Size     Beta            Epochs          K               AUC             Time           
+0.01            256             1.0             3               5000            0.8581 162.19s

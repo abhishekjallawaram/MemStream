@@ -1,0 +1,1 @@
+Learning Rate   Memory Size     Beta            K               Epochs          AUC             Time           

@@ -1,0 +1,27 @@
+Hyperparameter tuning results:
+Params: {'nu': 0.1, 'kernel': 'linear', 'gamma': 'scale', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.1, 'kernel': 'linear', 'gamma': 'auto', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.1, 'kernel': 'poly', 'gamma': 'scale', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.1, 'kernel': 'poly', 'gamma': 'auto', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.1, 'kernel': 'rbf', 'gamma': 'scale', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.1, 'kernel': 'rbf', 'gamma': 'auto', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.1, 'kernel': 'sigmoid', 'gamma': 'scale', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.1, 'kernel': 'sigmoid', 'gamma': 'auto', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.3, 'kernel': 'linear', 'gamma': 'scale', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.3, 'kernel': 'linear', 'gamma': 'auto', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.3, 'kernel': 'poly', 'gamma': 'scale', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.3, 'kernel': 'poly', 'gamma': 'auto', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.3, 'kernel': 'rbf', 'gamma': 'scale', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.3, 'kernel': 'rbf', 'gamma': 'auto', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.3, 'kernel': 'sigmoid', 'gamma': 'scale', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.3, 'kernel': 'sigmoid', 'gamma': 'auto', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.5, 'kernel': 'linear', 'gamma': 'scale', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.5, 'kernel': 'linear', 'gamma': 'auto', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.5, 'kernel': 'poly', 'gamma': 'scale', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.5, 'kernel': 'poly', 'gamma': 'auto', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.5, 'kernel': 'rbf', 'gamma': 'scale', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.5, 'kernel': 'rbf', 'gamma': 'auto', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.5, 'kernel': 'sigmoid', 'gamma': 'scale', 'memory_len': 256}, ROC-AUC score: 0.5
+Params: {'nu': 0.5, 'kernel': 'sigmoid', 'gamma': 'auto', 'memory_len': 256}, ROC-AUC score: 0.5
+Best score: 0.5
+Best params: {'nu': 0.1, 'kernel': 'linear', 'gamma': 'scale', 'memory_len': 256}
