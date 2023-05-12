@@ -1,0 +1,4 @@
+Found device: NVIDIA A100-SXM-80GB, n_gpu: 1
+KDD 1.0 256 0.01 5000
+Execution time: 399.90 seconds
+ROC-AUC 0.9874738145505115

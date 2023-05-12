@@ -1,0 +1,4 @@
+Found device: NVIDIA A100-SXM-80GB, n_gpu: 1
+satimage-2 10.0 256 0.01 5000
+Execution time: 4.51 seconds
+ROC-AUC 0.9998457424928013
