@@ -1,0 +1,1 @@
+Found device: NVIDIA A100-SXM-80GB, n_gpu: 1
