@@ -1,0 +1,4 @@
+Found device: NVIDIA A100-SXM-80GB, n_gpu: 1
+ionosphere 0.001 4 0.01 5000
+Execution time: 7.09 seconds
+ROC-AUC 0.8740345679012346
