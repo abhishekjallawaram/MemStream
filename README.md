@@ -1,14 +1,12 @@
-# MemStream
+# MemStream / EDEM
 
-<p>
-  <a href="https://arxiv.org/pdf/2106.03837.pdf"><img src="http://img.shields.io/badge/Paper-PDF-brightgreen.svg"></a>
-  <a href="https://github.com/Stream-AD/MemStream/blob/master/LICENSE">
-  </a>
-</p>
 
-Implementation of
+Reproducing
 
 - [MemStream: Memory-Based Streaming Anomaly Detection](https://arxiv.org/pdf/2106.03837.pdf). Siddharth Bhatia, Arjit Jain, Shivin Srivastava, Kenji Kawaguchi, Bryan Hooi. The Web Conference (formerly WWW), 2022.
+- For EDEM approach; replace 'memstream.py' with 'memstream-ede.py'
+
+Execute '*.sh' files for Pre-processing vs Sampling comparsion.
 
 ## Demo
 
@@ -39,56 +37,56 @@ Implementation of
 11) 'python3 memstream.py --dataset cover --beta 0.0001 --memlen 2048 —RQ1 True'
 
 #RQ2
-python3 memstream.py --dataset KDD --beta 1 --memlen 256 —RQ2 True
-python3 memstream.py --dataset NSL --beta 0.1 --memlen 2048 —RQ2 True
-python3 memstream.py --dataset UNSW --beta 0.1 --memlen 2048 —RQ2 True
-python3 memstream.py --dataset DOS --beta 0.1 --memlen 2048 —RQ2 True
-python3 memstream.py --dataset ionosphere --beta 0.001 --memlen 4 —RQ2 True
-python3 memstream.py --dataset cardio --beta 1 --memlen 64 —RQ2 True
-python3 memstream.py --dataset statlog --beta 0.01 --memlen 32 —RQ2 True
-python3 memstream.py --dataset satimage-2 --beta 10 --memlen 256 —RQ2 True
-python3 memstream.py --dataset mammography --beta 0.1 --memlen 128 —RQ2 True
-python3 memstream.py --dataset pima --beta 0.001 --memlen 64 —RQ2 True
-python3 memstream.py --dataset cover --beta 0.0001 --memlen 2048 —RQ2 True
+1) 'python3 memstream.py --dataset KDD --beta 1 --memlen 256 —RQ2 True'
+2) 'python3 memstream.py --dataset NSL --beta 0.1 --memlen 2048 —RQ2 True'
+3) 'python3 memstream.py --dataset UNSW --beta 0.1 --memlen 2048 —RQ2 True'
+4) 'python3 memstream.py --dataset DOS --beta 0.1 --memlen 2048 —RQ2 True'
+5) 'python3 memstream.py --dataset ionosphere --beta 0.001 --memlen 4 —RQ2 True'
+6) 'python3 memstream.py --dataset cardio --beta 1 --memlen 64 —RQ2 True'
+7) 'python3 memstream.py --dataset statlog --beta 0.01 --memlen 32 —RQ2 True'
+8) 'python3 memstream.py --dataset satimage-2 --beta 10 --memlen 256 —RQ2 True'
+9) 'python3 memstream.py --dataset mammography --beta 0.1 --memlen 128 —RQ2 True'
+10) 'python3 memstream.py --dataset pima --beta 0.001 --memlen 64 —RQ2 True''
+11) 'python3 memstream.py --dataset cover --beta 0.0001 --memlen 2048 —RQ2 True'
 
 #RQ3
-python3 memstream.py --dataset KDD --beta 1 --memlen 256 —RQ3 True
-python3 memstream.py --dataset NSL --beta 0.1 --memlen 2048 —RQ3 True
-python3 memstream.py --dataset UNSW --beta 0.1 --memlen 2048 —RQ3 True
-python3 memstream.py --dataset DOS --beta 0.1 --memlen 2048 —RQ3 True
-python3 memstream.py --dataset ionosphere --beta 0.001 --memlen 4 —RQ3 True
-python3 memstream.py --dataset cardio --beta 1 --memlen 64 —RQ3 True
-python3 memstream.py --dataset statlog --beta 0.01 --memlen 32 —RQ3 True
-python3 memstream.py --dataset satimage-2 --beta 10 --memlen 256 —RQ3 True
-python3 memstream.py --dataset mammography --beta 0.1 --memlen 128 —RQ3 True
-python3 memstream.py --dataset pima --beta 0.001 --memlen 64 —RQ3 True
-python3 memstream.py --dataset cover --beta 0.0001 --memlen 2048 —RQ3 True
+1) 'python3 memstream.py --dataset KDD --beta 1 --memlen 256 —RQ3 True'
+2) 'python3 memstream.py --dataset NSL --beta 0.1 --memlen 2048 —RQ3 True'
+3) 'python3 memstream.py --dataset UNSW --beta 0.1 --memlen 2048 —RQ3 True'
+4) 'python3 memstream.py --dataset DOS --beta 0.1 --memlen 2048 —RQ3 True'
+5) 'python3 memstream.py --dataset ionosphere --beta 0.001 --memlen 4 —RQ3 True'
+6) 'python3 memstream.py --dataset cardio --beta 1 --memlen 64 —RQ3 True'
+7) 'python3 memstream.py --dataset statlog --beta 0.01 --memlen 32 —RQ3 True'
+8) 'python3 memstream.py --dataset satimage-2 --beta 10 --memlen 256 —RQ3 True'
+9) 'python3 memstream.py --dataset mammography --beta 0.1 --memlen 128 —RQ3 True'
+10) 'python3 memstream.py --dataset pima --beta 0.001 --memlen 64 —RQ3 True'
+11) 'python3 memstream.py --dataset cover --beta 0.0001 --memlen 2048 —RQ3 True'
 
 #RQ4
-python3 memstream.py --dataset KDD --beta 1 --memlen 256 —RQ4 True
-python3 memstream.py --dataset NSL --beta 0.1 --memlen 2048 —RQ4 True
-python3 memstream.py --dataset UNSW --beta 0.1 --memlen 2048 —RQ4 True
-python3 memstream.py --dataset DOS --beta 0.1 --memlen 2048 —RQ4 True
-python3 memstream.py --dataset ionosphere --beta 0.001 --memlen 4 —RQ4 True
-python3 memstream.py --dataset cardio --beta 1 --memlen 64 —RQ4 True
-python3 memstream.py --dataset statlog --beta 0.01 --memlen 32 —RQ4 True
-python3 memstream.py --dataset satimage-2 --beta 10 --memlen 256 —RQ4 True
-python3 memstream.py --dataset mammography --beta 0.1 --memlen 128 —RQ4 True
-python3 memstream.py --dataset pima --beta 0.001 --memlen 64 —RQ4 True
-python3 memstream.py --dataset cover --beta 0.0001 --memlen 2048 —RQ4 True
+1) 'python3 memstream.py --dataset KDD --beta 1 --memlen 256 —RQ4 True'
+2) 'python3 memstream.py --dataset NSL --beta 0.1 --memlen 2048 —RQ4 True'
+3) 'python3 memstream.py --dataset UNSW --beta 0.1 --memlen 2048 —RQ4 True'
+4) 'python3 memstream.py --dataset DOS --beta 0.1 --memlen 2048 —RQ4 True'
+5) 'python3 memstream.py --dataset ionosphere --beta 0.001 --memlen 4 —RQ4 True'
+6) 'python3 memstream.py --dataset cardio --beta 1 --memlen 64 —RQ4 True'
+7) 'python3 memstream.py --dataset statlog --beta 0.01 --memlen 32 —RQ4 True'
+8) 'python3 memstream.py --dataset satimage-2 --beta 10 --memlen 256 —RQ4 True'
+9) 'python3 memstream.py --dataset mammography --beta 0.1 --memlen 128 —RQ4 True'
+10) 'python3 memstream.py --dataset pima --beta 0.001 --memlen 64 —RQ4 True'
+11) 'python3 memstream.py --dataset cover --beta 0.0001 --memlen 2048 —RQ4 True'
 
 #RQ5
-python3 memstream.py --dataset KDD --beta 1 --memlen 256 —RQ5 True
-python3 memstream.py --dataset NSL --beta 0.1 --memlen 2048 —RQ5 True
-python3 memstream.py --dataset UNSW --beta 0.1 --memlen 2048 —RQ5 True
-python3 memstream.py --dataset DOS --beta 0.1 --memlen 2048 —RQ5 True
-python3 memstream.py --dataset ionosphere --beta 0.001 --memlen 4 —RQ5 True
-python3 memstream.py --dataset cardio --beta 1 --memlen 64 —RQ5 True
-python3 memstream.py --dataset statlog --beta 0.01 --memlen 32 —RQ5 True
-python3 memstream.py --dataset satimage-2 --beta 10 --memlen 256 —RQ5 True
-python3 memstream.py --dataset mammography --beta 0.1 --memlen 128 —RQ5 True
-python3 memstream.py --dataset pima --beta 0.001 --memlen 64 —RQ5 True
-python3 memstream.py --dataset cover --beta 0.0001 --memlen 2048 —RQ5 True
+1) 'python3 memstream.py --dataset KDD --beta 1 --memlen 256 —RQ5 True'
+2) 'python3 memstream.py --dataset NSL --beta 0.1 --memlen 2048 —RQ5 True'
+3) 'python3 memstream.py --dataset UNSW --beta 0.1 --memlen 2048 —RQ5 True'
+4) 'python3 memstream.py --dataset DOS --beta 0.1 --memlen 2048 —RQ5 True'
+5) 'python3 memstream.py --dataset ionosphere --beta 0.001 --memlen 4 —RQ5 True'
+6) 'python3 memstream.py --dataset cardio --beta 1 --memlen 64 —RQ5 True'
+7) 'python3 memstream.py --dataset statlog --beta 0.01 --memlen 32 —RQ5 True'
+8) 'python3 memstream.py --dataset satimage-2 --beta 10 --memlen 256 —RQ5 True'
+9) 'python3 memstream.py --dataset mammography --beta 0.1 --memlen 128 —RQ5 True'
+10) 'python3 memstream.py --dataset pima --beta 0.001 --memlen 64 —RQ5 True'
+11) 'python3 memstream.py --dataset cover --beta 0.0001 --memlen 2048 —RQ5 True'
 
 ## Command line options
   * `--dataset`: The dataset to be used for training. Choices 'NSL', 'KDD', 'UNSW', 'DOS'. (default 'NSL')
@@ -102,6 +100,7 @@ python3 memstream.py --dataset cover --beta 0.0001 --memlen 2048 —RQ5 True
   * '--RQ3' : Memory Poisoning Prevention Analysis : Default False
   * '--RQ4' : Concept Dript Analysis : Default False
   * '--RQ5' : Impact of Memory : Default False
+  * '--sp' : Sampling method : Default : rand (Random seed) / str (Stratified sampling) / ovr (Random Oversampling) / sm (SMOTE) / ens_m (Ensemble : only for EDEM)
 
 ## Input file format
 MemStream expects the input multi-aspect record stream to be stored in a contains `,` separated file.
