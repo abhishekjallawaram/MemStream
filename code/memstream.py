@@ -27,27 +27,64 @@ start_time = time.time()
 import argparse
 
 parser = argparse.ArgumentParser()
+
+# --dataset: Specifies the dataset to be used, with 'NSL' as the default value.
 parser.add_argument('--dataset', default='NSL')
+
+# --beta: Specifies the value of beta as a floating-point number, with 0.1 as the default value.
 parser.add_argument('--beta', type=float, default=0.1)
+
+# --dev: Specifies the device to be used, with 'cuda:0' as the default value.
 parser.add_argument("--dev", help="device", default="cuda:0")
+
+# --epochs: Specifies the number of epochs for the autoencoder, with 5000 as the default value.
 parser.add_argument("--epochs", type=int, help="number of epochs for ae", default=5000)
+
+# --lr: Specifies the learning rate for the optimizer, with 1e-2 as the default value.
 parser.add_argument("--lr", type=float, help="learning rate", default=1e-2)
+
+# --memlen: Specifies the size of the memory, with 2048 as the default value.
 parser.add_argument("--memlen", type=int, help="size of memory", default=2048)
+
+# --seed: Specifies the random seed to be used, with 0 as the default value.
 parser.add_argument("--seed", type=int, help="random seed", default=0)
-parser.add_argument("--act_fn",help="Activation fucntion", default="Sigmoid")
-parser.add_argument("--RQ1", help="Hypertune best metrics : Default False", default=False)
-parser.add_argument("--RQ2", help="Effect of Activation Functions : Default False",default=False)
-parser.add_argument("--RQ3", help="Memory Poisoning Prevention Analysis",default=False)
-parser.add_argument("--RQ4", help="Concept Drift",default=False)
-parser.add_argument("--RQ5", help="Impact of Memory",default=False)
 
+# --act_fn: Specifies the activation function to be used, with 'Tanh' as the default value.
+parser.add_argument("--act_fn", help="Activation function", default="Tanh")
+
+# --RQ1: Specifies whether to execute RQ1 (Hypertune best metrics), with False as the default value.
+parser.add_argument("--RQ1", help="Hypertune best metrics: Default False", default=False)
+
+# --RQ2: Specifies whether to execute RQ2 (Effect of Activation Functions), with False as the default value.
+parser.add_argument("--RQ2", help="Effect of Activation Functions: Default False", default=False)
+
+# --RQ3: Specifies whether to execute RQ3 (Memory Poisoning Prevention Analysis), with False as the default value.
+parser.add_argument("--RQ3", help="Memory Poisoning Prevention Analysis", default=False)
+
+# --RQ4: Specifies whether to execute RQ4 (Concept Drift), with False as the default value.
+parser.add_argument("--RQ4", help="Concept Drift", default=False)
+
+# --RQ5: Specifies whether to execute RQ5 (Impact of Memory), with False as the default value.
+parser.add_argument("--RQ5", help="Impact of Memory", default=False)
+
+# --sp: Specifies the sampling method to be used, with 'rand' as the default value.
+parser.add_argument("--sp", help="Sampling Method", default="rand")
+
+
+# Parsing the command-line arguments and storing them in the `args` object.
 args = parser.parse_args()
 
+# Parsing the command-line arguments and storing them in the `args` object.
 args = parser.parse_args()
 
+# Setting the random seed for reproducibility based on the value specified in the command-line arguments.
 torch.manual_seed(args.seed)
+
+# Initializing variables to hold the filenames for the dataset files.
 nfile = None
 lfile = None
+
+# Selecting the appropriate dataset based on the value of `args.dataset`.
 if args.dataset == 'NSL':
     nfile = 'nsl.txt'
     lfile = 'nsllabel.txt'
@@ -64,14 +101,22 @@ elif args.dataset == 'SYN':
     nfile = 'syn.txt'
     lfile = 'synlabel.txt'
 else:
+    # Loading the dataset from a .mat file with the name specified in `args.dataset`.
     df = scipy.io.loadmat(args.dataset+".mat")
     numeric = torch.FloatTensor(df['X'])
     labels = (df['y']).astype(float).reshape(-1)
 
+# Setting the device to be used for computation based on the value specified in the command-line arguments.
 device = torch.device(args.dev)
 
 class MemStream(nn.Module):
     def __init__(self, in_dim, params, act_fn):
+        """
+        Initializes the MemStream module with the given input dimension (in_dim),
+        parameters (params), and activation function (act_fn). It sets up various
+        attributes such as memory length, maximum threshold, memory tensors,
+        network layers, and loss functions.
+        """
         super(MemStream, self).__init__()
         self.params = params
         self.in_dim = in_dim
@@ -102,6 +147,12 @@ class MemStream(nn.Module):
 
 
     def train_autoencoder(self, data, epochs):
+        """
+        Trains the autoencoder part of the network using the given data for
+        the specified number of epochs. It normalizes the data, performs
+        forward and backward passes, and updates the parameters using the
+        Adam optimizer.
+        """
         self.mean, self.std = self.mem_data.mean(0), self.mem_data.std(0)
         new = (data - self.mean) / self.std
         new[:, self.std == 0] = 0
@@ -115,6 +166,11 @@ class MemStream(nn.Module):
 
 
     def update_memory(self, output_loss, encoder_output, data):
+        """
+        Updates the memory of the module based on the output_loss (a scalar value),
+        encoder_output, and data. If the output_loss is below the maximum threshold,
+        it stores the encoder_output and data in the memory tensor.
+        """
         if output_loss <= self.max_thres:
             least_used_pos = self.count % self.memory_len
             if least_used_pos < self.memory.size(0):
@@ -127,6 +183,10 @@ class MemStream(nn.Module):
 
 
     def initialize_memory(self, x):
+        """
+        Initializes the memory of the module using the input x. It normalizes the input,
+        passes it through the encoder, and sets the memory tensor accordingly.
+        """
         mean, std = self.mem_data.mean(0), self.mem_data.std(0)
         new = (x - mean) / std
         new[:, std == 0] = 0
@@ -135,6 +195,11 @@ class MemStream(nn.Module):
         self.mem_data = x.to(device)
 
     def forward(self, x):
+        """
+        Performs the forward pass of the module with the given input x. It normalizes
+        the input, passes it through the encoder, calculates the
+        loss from the memory, updates the memory, and returns loss.
+        """
         new = (x - self.mean) / self.std
         new[:, self.std == 0] = 0
         encoder_output = self.encoder(new.to(device))
@@ -144,22 +209,36 @@ class MemStream(nn.Module):
 
 
 if args.dataset in ['KDD', 'NSL', 'UNSW', 'DOS']:
-    numeric = torch.FloatTensor(np.loadtxt(nfile, delimiter = ','))
+    # Loading the numeric and label data from the corresponding files based on the selected dataset.
+    numeric = torch.FloatTensor(np.loadtxt(nfile, delimiter=','))
     labels = np.loadtxt(lfile, delimiter=',')
     act_fn = nn.Tanh()
-else:
-    act_fn = nn.LogSoftmax(dim=1)
+# else:
+#     act_fn = nn.LogSoftmax(dim=1)
 
+# Setting the activation function to nn.Tanh() for the selected datasets.
+act_fn = nn.Tanh()
+
+# Modifying the labels for the 'KDD' dataset.
 if args.dataset == 'KDD':
     labels = 1 - labels
+
+# Setting the random seed based on the value specified in the command-line arguments.
 torch.manual_seed(args.seed)
+
+# Setting the memory length and other parameters for the MemStream module.
 N = args.memlen
 params = {
-          'beta': args.beta, 'memory_len': N, 'batch_size':1, 'lr':args.lr
-         }
+    'beta': args.beta,
+    'memory_len': N,
+    'batch_size': 1,
+    'lr': args.lr,
+    'in_dim': numeric[0].shape[0]
+}
 
+# Modifying the numeric and labels for the 'SYN' dataset.
 if args.dataset == 'SYN':
-    numeric = torch.FloatTensor(np.loadtxt(nfile, delimiter = ',')).reshape(-1, 1)
+    numeric = torch.FloatTensor(np.loadtxt(nfile, delimiter=',')).reshape(-1, 1)
     labels = np.loadtxt(lfile, delimiter=',')
     
 model = MemStream(numeric[0].shape[0],params,act_fn).to(device)
