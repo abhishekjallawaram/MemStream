@@ -1,4 +1,4 @@
-# MemStream / EDEM
+# MemStream / EDEM (Encoder-Decoder-Encoder Memory-based streaming anomaly detection approach)
 
 
 This repository implements MemStream, a memory-based streaming anomaly detection approach, and introduces EDEM, an extended version of MemStream.
