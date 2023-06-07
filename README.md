@@ -8,6 +8,20 @@ Reproducing & Introducing EDEM - Encoder-Decoder-Encoder Memory based Anomaly de
 
 Execute '*.sh' files for Pre-processing vs Sampling comparsion.
 
+## Command line options
+  * `--dataset`: The dataset to be used for training. Choices 'NSL', 'KDD', 'UNSW', 'DOS'. (default 'NSL')
+  * `--beta`: The threshold beta to be used. (default: 0.1)
+  * `--memlen`: The size of the Memory Module (default: 2048)
+  * `--dev`: Pytorch device to be used for training like "cpu", "cuda:0" etc. (default: 'cuda:0')
+  * `--lr`: Learning rate (default: 0.01)
+  * `--epochs`: Number of epochs (default: 5000)
+  * '--RQ1' : Hypertune best metrics : Default False
+  * '--RQ2' : Effect of Activation Functions : Default False
+  * '--RQ3' : Memory Poisoning Prevention Analysis : Default False
+  * '--RQ4' : Concept Dript Analysis : Default False
+  * '--RQ5' : Impact of Memory : Default False
+  * '--sp' : Sampling method : Default : rand (Random seed) / str (Stratified sampling) / ovr (Random Oversampling) / sm (SMOTE) / ens_m (Ensemble : only for EDEM)
+
 ## Demo
 
 1. KDDCUP99: Run `python3 memstream.py --dataset KDD --beta 1 --memlen 256`
@@ -88,19 +102,7 @@ Execute '*.sh' files for Pre-processing vs Sampling comparsion.
 10) 'python3 memstream.py --dataset pima --beta 0.001 --memlen 64 —RQ5 True'
 11) 'python3 memstream.py --dataset cover --beta 0.0001 --memlen 2048 —RQ5 True'
 
-## Command line options
-  * `--dataset`: The dataset to be used for training. Choices 'NSL', 'KDD', 'UNSW', 'DOS'. (default 'NSL')
-  * `--beta`: The threshold beta to be used. (default: 0.1)
-  * `--memlen`: The size of the Memory Module (default: 2048)
-  * `--dev`: Pytorch device to be used for training like "cpu", "cuda:0" etc. (default: 'cuda:0')
-  * `--lr`: Learning rate (default: 0.01)
-  * `--epochs`: Number of epochs (default: 5000)
-  * '--RQ1' : Hypertune best metrics : Default False
-  * '--RQ2' : Effect of Activation Functions : Default False
-  * '--RQ3' : Memory Poisoning Prevention Analysis : Default False
-  * '--RQ4' : Concept Dript Analysis : Default False
-  * '--RQ5' : Impact of Memory : Default False
-  * '--sp' : Sampling method : Default : rand (Random seed) / str (Stratified sampling) / ovr (Random Oversampling) / sm (SMOTE) / ens_m (Ensemble : only for EDEM)
+
 
 ## Input file format
 MemStream expects the input multi-aspect record stream to be stored in a contains `,` separated file.
