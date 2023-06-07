@@ -1,7 +1,7 @@
 # MemStream / EDEM
 
 
-Reproducing
+Reproducing & Introducing EDEM - Encoder-Decoder-Encoder Memory based Anomaly detection
 
 - [MemStream: Memory-Based Streaming Anomaly Detection](https://arxiv.org/pdf/2106.03837.pdf). Siddharth Bhatia, Arjit Jain, Shivin Srivastava, Kenji Kawaguchi, Bryan Hooi. The Web Conference (formerly WWW), 2022.
 - For EDEM approach; replace 'memstream.py' with 'memstream-ede.py'
