@@ -30,18 +30,18 @@ EDEM (Encoder-Decoder-Encoder Memory) is an extension of MemStream, which enhanc
 
 ## Demo
 
-1. KDDCUP99: Run `python3 memstream.py --dataset KDD --beta 1 --memlen 256`
-2. NSL-KDD: Run `python3 memstream.py --dataset NSL --beta 0.1 --memlen 2048`
-3. UNSW-NB 15: Run `python3 memstream.py --dataset UNSW --beta 0.1 --memlen 2048`
-4. CICIDS-DoS: Run `python3 memstream.py --dataset DOS --beta 0.1 --memlen 2048`
-5. SYN: Run `python3 memstream-syn.py --dataset SYN --beta 1 --memlen 16`
-6. Ionosphere: Run `python3 memstream.py --dataset ionosphere --beta 0.001 --memlen 4`
-7. Cardiotocography: Run `python3 memstream.py --dataset cardio --beta 1 --memlen 64`
-8. Statlog Landsat Satellite: Run `python3 memstream.py --dataset statlog --beta 0.01 --memlen 32`
-9. Satimage-2: Run `python3 memstream.py --dataset satimage-2 --beta 10 --memlen 256`
-10. Mammography: Run `python3 memstream.py --dataset mammography --beta 0.1 --memlen 128`
-11. Pima Indians Diabetes: Run `python3 memstream.py --dataset pima --beta 0.001 --memlen 64`
-12. Covertype: Run `python3 memstream.py --dataset cover --beta 0.0001 --memlen 2048`
+1. KDDCUP99: Run `python3 memstream-ml3.py --dataset KDD --beta 1 --memlen 256`
+2. NSL-KDD: Run `python3 memstream-ml3.py --dataset NSL --beta 0.1 --memlen 2048`
+3. UNSW-NB 15: Run `python3 memstream-ml3.py --dataset UNSW --beta 0.1 --memlen 2048`
+4. CICIDS-DoS: Run `python3 memstream-ml3.py --dataset DOS --beta 0.1 --memlen 2048`
+5. SYN: Run `python3 memstream-ml3.py --dataset SYN --beta 1 --memlen 16`
+6. Ionosphere: Run `python3 memstream-ml3.py --dataset ionosphere --beta 0.001 --memlen 4`
+7. Cardiotocography: Run `python3 memstream-ml3.py --dataset cardio --beta 1 --memlen 64`
+8. Statlog Landsat Satellite: Run `python3 memstream-ml3.py --dataset statlog --beta 0.01 --memlen 32`
+9. Satimage-2: Run `python3 memstream-ml3.py --dataset satimage-2 --beta 10 --memlen 256`
+10. Mammography: Run `python3 memstream-ml3.py --dataset mammography --beta 0.1 --memlen 128`
+11. Pima Indians Diabetes: Run `python3 memstream-ml3.py --dataset pima --beta 0.001 --memlen 64`
+12. Covertype: Run `python3 memstream-ml3.py --dataset cover --beta 0.0001 --memlen 2048`
 
 
 ## Research Questions
